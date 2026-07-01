@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>im giving back</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:    #1B2B3A;
+      --offwhite:#F8F7F4;
+      --sage:    #5A8A6F;
+      --sage-lt: #EAF1EC;
+      --stone:   #E8E4DE;
+      --muted:   #7A8896;
+      --red:     #C0503A;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--offwhite); color: var(--navy); font-size: 16px; line-height: 1.6; }
+
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--offwhite); border-bottom: 1px solid var(--stone);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(1.5rem, 5vw, 4rem); height: 60px;
+    }
+    .nav-logo { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--navy); text-decoration: none; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--navy); }
+
+    /* ── LOADING ── */
+    #loading {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 60vh; flex-direction: column; gap: 1rem;
+      color: var(--muted); font-size: 0.9rem;
+    }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--stone);
+      border-top-color: var(--sage); border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #main-content { display: none; }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--navy); color: var(--offwhite);
+      padding: clamp(4rem, 10vw, 8rem) clamp(1.5rem, 5vw, 4rem);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: end;
+    }
+    @media (max-width: 700px) { .hero { grid-template-columns: 1fr; } }
+    .hero-label { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sage); margin-bottom: 1rem; }
+    .hero-total { font-family: 'DM Serif Display', serif; font-size: clamp(3.5rem, 8vw, 6.5rem); line-height: 1; color: #fff; }
+    .hero-total span.sym { color: var(--sage); }
+    .hero-subtitle { margin-top: 1.5rem; font-size: 1rem; color: rgba(248,247,244,0.6); max-width: 30ch; }
+    .hero-stats { display: flex; flex-direction: column; gap: 2rem; padding-bottom: 0.5rem; }
+    .hero-stat-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(248,247,244,0.45); margin-bottom: 0.25rem; }
+    .hero-stat-value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: #fff; }
+
+    /* ── SECTIONS ── */
+    section { padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 5vw, 4rem); }
+    section + section { border-top: 1px solid var(--stone); }
+    .section-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sage); margin-bottom: 0.75rem; }
+    .section-title { font-family: 'DM Serif Display', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.15; max-width: 18ch; margin-bottom: 2.5rem; }
+
+    /* ── OVERVIEW CARDS ── */
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+    .overview-card { background: #fff; border: 1px solid var(--stone); border-radius: 4px; padding: 1.5rem; }
+    .overview-card-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .overview-card-value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--navy); }
+    .overview-card-sub { margin-top: 0.4rem; font-size: 0.8rem; color: var(--muted); }
+    .tag-positive { color: var(--sage); font-weight: 600; }
+    .tag-negative { color: var(--red); font-weight: 600; }
+
+    /* ── DONATIONS TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    thead th { text-align: left; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 0.75rem 1rem; border-bottom: 2px solid var(--stone); }
+    tbody tr { border-bottom: 1px solid var(--stone); transition: background 0.15s; }
+    tbody tr:hover { background: var(--sage-lt); }
+    tbody td { padding: 1rem 1rem; color: var(--navy); }
+    .cause-pill { display: inline-block; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; background: var(--stone); color: var(--navy); border-radius: 2px; padding: 0.2rem 0.5rem; }
+    .amount-cell { font-family: 'DM Serif Display', serif; font-size: 1.1rem; }
+
+    /* ── BAR CHART ── */
+    .bar-chart { display: flex; flex-direction: column; gap: 1rem; max-width: 700px; margin-bottom: 3rem; }
+    .bar-row { display: flex; align-items: center; gap: 1rem; }
+    .bar-label { width: 140px; font-size: 0.8rem; color: var(--muted); text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 10px; background: var(--stone); border-radius: 2px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--sage); border-radius: 2px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+    .bar-amount { width: 80px; font-size: 0.85rem; font-weight: 500; text-align: right; }
+
+    /* ── HOLDINGS ── */
+    .holdings-group { margin-bottom: 3rem; }
+    .holdings-group:last-child { margin-bottom: 0; }
+    .holdings-group-label {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid var(--stone);
+      padding-bottom: 0.6rem; margin-bottom: 1.25rem;
+    }
+    .holdings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+
+    /* Portfolio summary card */
+    .holding-card { background: #fff; border: 1px solid var(--stone); border-radius: 4px; padding: 1.5rem 1.75rem; }
+    .holding-name { font-family: 'DM Serif Display', serif; font-size: 1.2rem; margin-bottom: 0.2rem; }
+    .holding-type { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.1rem; }
+    .holding-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.85rem; padding: 0.4rem 0; border-bottom: 1px solid var(--stone); }
+    .holding-row:last-child { border-bottom: none; }
+    .holding-row-label { color: var(--muted); }
+    .holding-row-val { font-weight: 500; }
+
+    /* Actual holdings table-style card */
+    .holdings-table-card { background: #fff; border: 1px solid var(--stone); border-radius: 4px; overflow: hidden; }
+    .holdings-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .holdings-table thead th {
+      text-align: left; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 0.7rem 1rem; background: var(--offwhite);
+      border-bottom: 1px solid var(--stone);
+    }
+    .holdings-table thead th:not(:first-child) { text-align: right; }
+    .holdings-table tbody tr { border-bottom: 1px solid var(--stone); transition: background 0.15s; }
+    .holdings-table tbody tr:last-child { border-bottom: none; }
+    .holdings-table tbody tr:hover { background: var(--sage-lt); }
+    .holdings-table tbody td { padding: 0.75rem 1rem; }
+    .holdings-table tbody td:not(:first-child) { text-align: right; }
+    .holdings-table .holding-ticker { font-weight: 600; }
+    .holdings-table .holding-full-name { font-size: 0.75rem; color: var(--muted); }
+
+    /* Reserve card — wider single card */
+    .reserve-card {
+      background: #fff; border: 1px solid var(--stone); border-radius: 4px;
+      padding: 1.5rem 1.75rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem;
+    }
+    .reserve-stat-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+    .reserve-stat-value { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--navy); }
+    .reserve-stat-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+
+    /* ── GOALS ── */
+    .goals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+    .goal-card { background: #fff; border: 1px solid var(--stone); border-radius: 4px; padding: 1.5rem; }
+    .goal-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; margin-bottom: 0.35rem; }
+    .goal-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .goal-progress-track { height: 6px; background: var(--stone); border-radius: 3px; overflow: hidden; margin-bottom: 0.6rem; }
+    .goal-progress-fill { height: 100%; background: var(--sage); border-radius: 3px; transition: width 1.4s cubic-bezier(0.4,0,0.2,1); }
+    .goal-progress-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); }
+    .goal-progress-labels strong { color: var(--navy); }
+
+    /* ── FOOTER ── */
+    footer { background: var(--navy); color: rgba(248,247,244,0.45); text-align: center; padding: 2.5rem clamp(1.5rem, 5vw, 4rem); font-size: 0.8rem; }
+    footer strong { color: rgba(248,247,244,0.7); }
+    #last-updated { color: rgba(248,247,244,0.7); }
+
+    @media (prefers-reduced-motion: reduce) { .bar-fill, .goal-progress-fill { transition: none; } }
+  </style>
+</head>
+<body>
+
+
+<nav>
+  <a class="nav-logo" href="#">noblesse oblige</a>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#donations">Donations</a></li>
+    <li><a href="#holdings">Holdings</a></li>
+    <li><a href="#goals">Goals</a></li>
+  </ul>
+</nav>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <span>Loading your data…</span>
+</div>
+
+<div id="main-content">
+
+  <header class="hero">
+    <div>
+      <p class="hero-label" id="hero-year"></p>
+      <div class="hero-total"><span class="sym">$</span><span id="counter">0</span></div>
+      <p class="hero-subtitle">Total given to causes I care about</p>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <p class="hero-stat-label">Organizations Supported</p>
+        <p class="hero-stat-value" id="stat-orgs">—</p>
+      </div>
+      <div>
+        <p class="hero-stat-label">Giving Since</p>
+        <p class="hero-stat-value">June 2026</p>
+      </div>
+      <div>
+        <p class="hero-stat-label">Portfolio Value</p>
+        <p class="hero-stat-value" id="stat-portfolio">—</p>
+      </div>
+    </div>
+  </header>
+
+  <section id="overview">
+    <p class="section-eyebrow">Overview</p>
+    <h2 class="section-title">How it's going</h2>
+    <div class="overview-grid" id="overview-cards"></div>
+  </section>
+
+  <section id="donations">
+    <p class="section-eyebrow">Donations</p>
+    <h2 class="section-title">By cause</h2>
+    <div class="bar-chart" id="bar-chart"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Organization</th>
+            <th>Cause</th>
+            <th style="text-align:right">Amount</th>
+            <th>Type</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="donations-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="holdings">
+    <p class="section-eyebrow">Account Holdings</p>
+    <h2 class="section-title">Philanthropic portfolio</h2>
+
+    <!-- Group 1: Portfolio summary -->
+    <div class="holdings-group">
+      <p class="holdings-group-label">Portfolio Overview</p>
+      <div class="holdings-grid" id="holdings-portfolio-grid"></div>
+    </div>
+
+    <!-- Group 2: Actual holdings -->
+    <div class="holdings-group">
+      <p class="holdings-group-label">Positions</p>
+      <div class="holdings-table-card">
+        <table class="holdings-table">
+          <thead>
+            <tr>
+              <th>Holding</th>
+              <th>Value ($)</th>
+              <th>Allocation (%)</th>
+              <th>Total Return</th>
+            </tr>
+          </thead>
+          <tbody id="holdings-positions-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Group 3: Donation reserve -->
+    <div class="holdings-group">
+      <p class="holdings-group-label">Current Year Donation Reserve</p>
+      <div class="reserve-card" id="holdings-reserve-card"></div>
+    </div>
+  </section>
+
+  <section id="goals">
+    <p class="section-eyebrow">Goals & Impact</p>
+    <h2 class="section-title">What I'm working toward</h2>
+    <div class="goals-grid" id="goals-grid"></div>
+  </section>
+
+  <footer>
+    <p><strong id="last-updated"></strong></p>
+  </footer>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIGURATION — paste your published CSV URLs here
+// ─────────────────────────────────────────────
+const SHEET_URLS = {
+  donations: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZg7Y4Y5FtT1Hdl5dwKaySTOt-lURfmKxe0sddojU-hVxQpey9GJBqF0wOkW6jHG8eOPmv44UT8igO/pub?gid=0&single=true&output=csv',   // Donations tab
+  portfolio: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZg7Y4Y5FtT1Hdl5dwKaySTOt-lURfmKxe0sddojU-hVxQpey9GJBqF0wOkW6jHG8eOPmv44UT8igO/pub?gid=941427027&single=true&output=csv',   // Portfolio tab
+  positions: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZg7Y4Y5FtT1Hdl5dwKaySTOt-lURfmKxe0sddojU-hVxQpey9GJBqF0wOkW6jHG8eOPmv44UT8igO/pub?gid=1587080512&single=true&output=csv',   // Positions tab
+  reserve:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZg7Y4Y5FtT1Hdl5dwKaySTOt-lURfmKxe0sddojU-hVxQpey9GJBqF0wOkW6jHG8eOPmv44UT8igO/pub?gid=40544898&single=true&output=csv',   // Reserve tab
+  goals:     'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZg7Y4Y5FtT1Hdl5dwKaySTOt-lURfmKxe0sddojU-hVxQpey9GJBqF0wOkW6jHG8eOPmv44UT8igO/pub?gid=260927652&single=true&output=csv',   // Goals tab
+};
+
+
+
+
+// ─────────────────────────────────────────────
+// CSV PARSER
+// ─────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).map(line => {
+    // Handle quoted fields with commas inside
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    cols.push(cur.trim());
+    const row = {};
+    headers.forEach((h, i) => {
+      const val = (cols[i] || '').replace(/^"|"$/g, '');
+      row[h] = isNaN(val) || val === '' ? val : Number(val);
+    });
+    return row;
+  }).filter(r => Object.values(r).some(v => v !== '' && v !== null));
+}
+
+// ─────────────────────────────────────────────
+// FETCH helpers
+// ─────────────────────────────────────────────
+async function fetchSheet(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch ' + url);
+  return parseCSV(await res.text());
+}
+
+const fmt = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 });
+const fmtShort = v => v >= 1e6 ? '$' + (v/1e6).toFixed(2) + 'M' : fmt.format(v);
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function render({ donations, portfolio, positions, reserve, goals }) {
+  // ── Totals ──────────────────────────────────
+  const totalDonated = donations.reduce((s, d) => s + (Number(d.Amount)||0), 0);
+  const uniqueOrgs   = new Set(donations.map(d => d.Organization)).size;
+  const uniqueCauses = new Set(donations.map(d => d.Cause)).size;
+  const portfolioVal = (portfolio[0] ? Number(portfolio[0].Balance)||0 : 0);
+
+  // ── Hero ────────────────────────────────────
+  const yr = new Date().getFullYear();
+  document.getElementById('hero-year').textContent = yr + ' Report';
+  document.getElementById('stat-orgs').textContent = uniqueOrgs;
+  document.getElementById('stat-portfolio').textContent = fmtShort(portfolioVal);
+  animateCounter(totalDonated, 1800);
+
+  // ── Overview cards ───────────────────────────
+  const recurring = donations.filter(d => d.Type === 'Recurring' || (d.Type||'').toLowerCase().includes('recur'));
+  const recurringTotal = recurring.reduce((s,d) => s + (Number(d.Amount)||0), 0);
+  const largest = [...donations].sort((a,b) => b.Amount - a.Amount)[0];
+
+  document.getElementById('overview-cards').innerHTML = `
+    <div class="overview-card">
+      <p class="overview-card-label">Total Donated</p>
+      <p class="overview-card-value">${fmtShort(totalDonated)}</p>
+      <p class="overview-card-sub">${donations.length} transactions</p>
+    </div>
+    <div class="overview-card">
+      <p class="overview-card-label">Largest Single Gift</p>
+      <p class="overview-card-value">${fmtShort(largest?.Amount||0)}</p>
+      <p class="overview-card-sub">${largest?.Organization||'—'} — ${largest?.Cause||''}</p>
+    </div>
+    <div class="overview-card">
+      <p class="overview-card-label">Total Contributions</p>
+      <p class="overview-card-value">${fmtShort(Number(portfolio[0]?.YTDContributions)||0)}</p>
+      <p class="overview-card-sub">YTD into philanthropic portfolio</p>
+    </div>
+    <div class="overview-card">
+      <p class="overview-card-label">YTD Return</p>
+      <p class="overview-card-value">${portfolio[0]?.InvestmentReturn||'—'}</p>
+      <p class="overview-card-sub">Portfolio investment return</p>
+    </div>
+  `;
+
+  // ── Bar chart by cause ───────────────────────
+  const byCause = {};
+  donations.forEach(d => {
+    byCause[d.Cause] = (byCause[d.Cause]||0) + (Number(d.Amount)||0);
+  });
+  const sortedCauses = Object.entries(byCause).sort((a,b) => b[1]-a[1]);
+  const maxCause = sortedCauses[0]?.[1] || 1;
+  document.getElementById('bar-chart').innerHTML = sortedCauses.map(([cause, amt]) => `
+    <div class="bar-row">
+      <span class="bar-label">${cause}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0" data-pct="${(amt/maxCause*100).toFixed(1)}"></div></div>
+      <span class="bar-amount">${fmtShort(amt)}</span>
+    </div>
+  `).join('');
+
+  // ── Donations table ──────────────────────────
+  document.getElementById('donations-tbody').innerHTML = donations.map(d => `
+    <tr>
+      <td>${d.Date||''}</td>
+      <td>${d.Organization||''}</td>
+      <td><span class="cause-pill">${d.Cause||''}</span></td>
+      <td class="amount-cell" style="text-align:right">${d.Type==='Recurring' ? fmt.format(d.Amount)+'/mo' : fmt.format(d.Amount)}</td>
+      <td>${d.Type||''}</td>
+      <td style="color:var(--muted); font-size:0.82rem">${d.Notes||''}</td>
+    </tr>
+  `).join('');
+
+  // ── Holdings: Portfolio summary cards ───────
+  document.getElementById('holdings-portfolio-grid').innerHTML = portfolio.map(p => {
+    const rows = [
+      ['Current Balance',         fmtShort(Number(p.Balance)||0)],
+      ['Total Contributions',       fmtShort(Number(p.TotalContributions)||0)],
+      ['Projected Next-Yr Pledge',fmtShort(Number(p.ProjectedPledge)||0)],
+      ['Investment Return',       p.InvestmentReturn||'—'],
+    ];
+    return `
+      <div class="holding-card">
+        <p class="holding-name">${p.Name}</p>
+        <p class="holding-type">${p.Type}</p>
+        ${rows.map(([label, val]) => `
+          <div class="holding-row">
+            <span class="holding-row-label">${label}</span>
+            <span class="holding-row-val ${String(val).startsWith('+') ? 'tag-positive' : ''}">${val}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+
+  // ── Holdings: Positions table ────────────────
+  const totalPositionVal = positions.reduce((s,p) => s + (Number(p.Value)||0), 0);
+  document.getElementById('holdings-positions-tbody').innerHTML = positions.map(p => {
+    const val = Number(p.Value)||0;
+    const alloc = Number(p.Allocation) || (totalPositionVal ? (val/totalPositionVal*100) : 0);
+    const retRaw = p.TotalReturn;
+    const ret = retRaw === '' || retRaw === undefined ? '—' : (isNaN(retRaw) ? String(retRaw) : (Number(retRaw) >= 0 ? '+' : '') + Number(retRaw).toFixed(2) + '%');
+    const retClass = ret.startsWith('+') ? 'tag-positive' : ret.startsWith('-') ? 'tag-negative' : '';
+    return `
+      <tr>
+        <td>
+          <span class="holding-ticker">${p.Ticker||p.Name}</span>
+          ${p.Ticker && p.Name ? `<br><span class="holding-full-name">${p.Name}</span>` : ''}
+        </td>
+        <td>${fmtShort(val)}</td>
+        <td>${alloc.toFixed(1)}%</td>
+        <td class="${retClass}">${ret||'—'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // ── Holdings: Donation reserve ───────────────
+  const r = reserve;
+  document.getElementById('holdings-reserve-card').innerHTML = `
+    <div>
+      <p class="reserve-stat-label">Cash Balance</p>
+      <p class="reserve-stat-value">${fmtShort(Number(r.CashBalance)||0)}</p>
+      <p class="reserve-stat-sub">Ready to donate</p>
+    </div>
+    <div>
+      <p class="reserve-stat-label">DAF Balance</p>
+      <p class="reserve-stat-value">${fmtShort(Number(r.DAFBalance)||0)}</p>
+      <p class="reserve-stat-sub">Donor-advised fund</p>
+    </div>
+    <div>
+      <p class="reserve-stat-label">Interest Rate</p>
+      <p class="reserve-stat-value">${r.IntRate||'—'}</p>
+      <p class="reserve-stat-sub">APY on cash</p>
+    </div>
+    <div>
+      <p class="reserve-stat-label">YTD Interest Earned</p>
+      <p class="reserve-stat-value">${fmtShort(Number(r.YTDInterest)||0)}</p>
+      <p class="reserve-stat-sub" >Compounding toward giving</p>
+    </div>
+  `;
+
+  // ── Goals ───────────────────────────────────
+  document.getElementById('goals-grid').innerHTML = goals.map(g => {
+    const cur = Number(g.Current)||0;
+    const tgt = Number(g.Target)||1;
+    const pct = Math.min(100, (cur/tgt*100)).toFixed(0);
+    const unit = g.Unit||'';
+    const fmtVal = v => unit === '$' ? fmtShort(v) : v + unit;
+    return `
+      <div class="goal-card">
+        <p class="goal-title">${g.Title}</p>
+        <p class="goal-desc">${g.Description}</p>
+        <div class="goal-progress-track">
+          <div class="goal-progress-fill" style="width:0" data-pct="${pct}"></div>
+        </div>
+        <div class="goal-progress-labels">
+          <span><strong>${fmtVal(cur)}</strong> so far</span>
+          <span>${fmtVal(tgt)} goal</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // ── Animate bars & progress after render ────
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar-fill, .goal-progress-fill').forEach(el => {
+      setTimeout(() => { el.style.width = el.dataset.pct + '%'; }, 100);
+    });
+  });
+
+  // ── Footer ──────────────────────────────────
+  document.getElementById('last-updated').textContent =
+    'Last updated ' + new Date().toLocaleDateString('en-US', { month:'long', year:'numeric' }) + '.';
+}
+
+// ─────────────────────────────────────────────
+// COUNTER ANIMATION
+// ─────────────────────────────────────────────
+function animateCounter(target, duration) {
+  const el = document.getElementById('counter');
+  const formatter = new Intl.NumberFormat('en-US');
+  const start = performance.now();
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = formatter.format(Math.round(target * ease));
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+async function boot() {
+  let data;
+  try {
+    const [donations, portfolio, positions, reserveRows, goals] = await Promise.all([
+      fetchSheet(SHEET_URLS.donations),
+      fetchSheet(SHEET_URLS.portfolio),
+      fetchSheet(SHEET_URLS.positions),
+      fetchSheet(SHEET_URLS.reserve),
+      fetchSheet(SHEET_URLS.goals),
+    ]);
+    // Reserve tab is a single-row key-value sheet; use first row as object
+    const reserve = reserveRows[0] || {};
+    data = { donations, portfolio, positions, reserve, goals };
+  } catch (err) {
+    document.getElementById('loading').innerHTML =
+      `<p style="color:var(--red); max-width:40ch; text-align:center">
+        Could not load your Google Sheet. Check that the URLs are correct and the sheet is published to the web.<br><br>
+        <small>${err.message}</small>
+      </p>`;
+    return;
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+  render(data);
+}
+
+boot();
+</script>
+</body>
+</html>
